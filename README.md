@@ -31,7 +31,7 @@
 ### 4. Use the Endpoint
 
 1. To process a file, you need to access the following endpoint:
-   here is the example directory "C:\\folder1\\folder_inside_folder 1\\text.pdf
+   here is the example directory C:\\folder1\\folder_inside_folder 1\\text.pdf
 
     ```
     http://0.0.0.0:8008/process?file_path=the_file_path\\file.pdf
