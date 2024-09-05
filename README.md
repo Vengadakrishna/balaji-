@@ -44,8 +44,9 @@
     ```bash
     curl "http://0.0.0.0:8008/process?file_path=thefilepath\\file.pdf"
     ```
-4. localhost url
+4. localhost url, this url should paste in the browser after python code is started running.
     ```url
     http://localhost:8008/process?file_path=
     ```
     file path should be in form of ```c:\\folder 1\\inside folder 1\\ test.pdf```
+   file path is the directory of the pdf file you need.
