@@ -44,4 +44,8 @@
     ```bash
     curl "http://0.0.0.0:8008/process?file_path=thefilepath\\file.pdf"
     ```
-
+4. localhost url
+    ```url
+    http://localhost:8008/process?file_path=
+    ```
+    file path should be in form of c: \\ folder 1 \\ folder 2 \\ test.pdf
