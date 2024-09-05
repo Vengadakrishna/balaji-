@@ -48,4 +48,4 @@
     ```url
     http://localhost:8008/process?file_path=
     ```
-    file path should be in form of c: \\ folder 1 \\ folder 2 \\ test.pdf
+    file path should be in form of ```c: r\\folder 1\\folder 2\\ test.pdf```
