@@ -48,7 +48,7 @@ def process_ocr_output(ocr_output):
         
         for page in ocr_output:
             page_content = list(page.values())[0]
-            messages = f"You are a helpful assistant that fixes errors in OCR outputs and provides correct data in the same format. Fix the errors and get correct data in same format:\n{page_content}"
+            messages = f"You are a helpful assistant that fixes errors in OCR outputs and provides correct data in the same JSON format.:\n{page_content}"
             response = get_openai_response(messages)
             corrected_output_parts.append({list(page.keys())[0]: response})
         
