@@ -20,9 +20,10 @@ document_analysis_client = DocumentAnalysisClient(
 
 # initialize openAI
 client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_ENDPOINT")  # Add this line for custom endpoint
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    base_url=os.environ.get("OPENAI_ENDPOINT")  # Add this line for custom endpoint
 )
+
 # initialize fastAPI 
 app = FastAPI()
 
@@ -62,15 +63,14 @@ def process_ocr_output(ocr_output):
 
 def get_openai_response(messages):
     try:
-        
         chat_completion = client.chat.completions.create(
-            messages= [
+            messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": messages}
             ],
             model="gpt-3.5-turbo",
             max_tokens=2000
-            )
+        )
         
         return chat_completion.choices[0].message.content.strip()
     except Exception as e:
