@@ -42,7 +42,7 @@
     **Using `curl`:**
 
     ```bash
-    curl "http://localhost:8008/process?file_path=D://Office//IDA//Samples.pdf"
+    curl "http://localhost:8008/process?file_path=D://Office//Samples.pdf"
     ```
 4. localhost url, this url should paste in the browser after python code is started running.
     ```url
