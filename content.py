@@ -20,8 +20,8 @@ document_analysis_client = DocumentAnalysisClient(
 
 # initialize openAI
 client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    base_url=os.environ.get("OPENAI_API_BASE")  # Add this line for custom endpoint
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_ENDPOINT")  # Add this line for custom endpoint
 )
 # initialize fastAPI 
 app = FastAPI()
