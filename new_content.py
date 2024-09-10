@@ -58,7 +58,7 @@ def process_ocr_output(ocr_output):
 
 def get_openai_response(messages):
     try:
-        conn = http.client.HTTPSConnection(openai_endpoint)
+        conn = http.client.HTTPSConnection("devaipalpoc.openai.azure.com", port=443)
         payload = json.dumps({
             "messages": [
                 {"role": "system", "content": "You are a helpful assistant."},
@@ -69,7 +69,7 @@ def get_openai_response(messages):
         })
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': f'{openai_api_key}'
+            'Authorization': f'Bearer {openai_api_key}'  # Use 'Bearer' for authorization
         }
         conn.request("POST", "/v1/chat/completions", payload, headers)
         response = conn.getresponse()
@@ -79,6 +79,7 @@ def get_openai_response(messages):
     except Exception as e:
         print(f"Error fetching response from OpenAI: {e}")
         raise
+
 
 def get_metadata(content):
     prompt = f"""
@@ -257,7 +258,7 @@ def process_document(file_path):
 def read_root():
     return {"status": "success"}
 
-@app.post("/process")
+@app.get("/process")
 def process_route(file_path: str):
     process_result = process_document(file_path)
     return JSONResponse(content=process_result, status_code=200)
