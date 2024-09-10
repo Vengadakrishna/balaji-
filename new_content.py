@@ -69,7 +69,7 @@ def get_openai_response(messages):
         })
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {openai_api_key}'
+            'Authorization': f'{openai_api_key}'
         }
         conn.request("POST", "/v1/chat/completions", payload, headers)
         response = conn.getresponse()
