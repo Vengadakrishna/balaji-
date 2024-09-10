@@ -75,11 +75,17 @@ def get_openai_response(messages):
         response = conn.getresponse()
         data = response.read()
         result = json.loads(data.decode("utf-8"))
-        return result['choices'][0]['message']['content'].strip()
+
+        
+        if 'choices' in result and result['choices']:
+            return result['choices'][0]['message']['content'].strip()
+        else:
+            print(f"Unexpected response format from OpenAI: {result}")
+            return None
+
     except Exception as e:
         print(f"Error fetching response from OpenAI: {e}")
-        raise
-
+        return None
 
 def get_metadata(content):
     prompt = f"""
@@ -238,21 +244,26 @@ def process_document(file_path):
         else:
             processed_data = process_ocr_output(extracted_data)
             print("Processed OCR is completed. Now getting values for the fields.")
-        
+
         fields_and_answers = get_metadata(processed_data)
         max_attempts = 5
         attempt = 0
-        
+
         while fields_and_answers is None and attempt < max_attempts:
             fields_and_answers = get_metadata(processed_data)
             if fields_and_answers is None:
-                print(f"Attempt {attempt + 1}: fields is None, retrying...")
+                print(f"Attempt {attempt + 1}: Unexpected response from OpenAI, retrying...")
             attempt += 1
-        return fields_and_answers
+
+        if fields_and_answers is None:
+            return {"error": "Failed to extract metadata from OpenAI"}
+        else:
+            return fields_and_answers
 
     except Exception as e:
         print(f"Document analysis (OCR) failed for the document: {e}")
         return {"error": str(e)}
+    
 
 @app.get("/")
 def read_root():
