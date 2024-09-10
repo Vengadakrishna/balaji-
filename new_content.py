@@ -1,11 +1,11 @@
 import os
 import json
-import http.client
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
+import requests
 
 # Load environment variables
 load_dotenv()
@@ -58,35 +58,35 @@ def process_ocr_output(ocr_output):
 
 def get_openai_response(messages):
     try:
-        conn = http.client.HTTPSConnection("devaipalpoc.openai.azure.com", port=443)
-        payload = json.dumps({
+        url = f"{openai_endpoint}/v1/chat/completions"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {openai_api_key}'
+        }
+        payload = {
             "messages": [
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": messages}
             ],
             "model": "gpt-3.5-turbo",
             "max_tokens": 2000
-        })
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {openai_api_key}'  # Use 'Bearer' for authorization
         }
-        conn.request("POST", "/v1/chat/completions", payload, headers)
-        response = conn.getresponse()
-        data = response.read()
-        result = json.loads(data.decode("utf-8"))
 
-        
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()  # Raise an exception for non-2xx status codes
+
+        result = response.json()
+
         if 'choices' in result and result['choices']:
             return result['choices'][0]['message']['content'].strip()
         else:
             print(f"Unexpected response format from OpenAI: {result}")
             return None
 
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         print(f"Error fetching response from OpenAI: {e}")
         return None
-
+    
 def get_metadata(content):
     prompt = f"""
             You are tasked with extracting specific metadata fields from a document. Your goal is to accurately extract all required fields from the given document text.
@@ -269,7 +269,7 @@ def process_document(file_path):
 def read_root():
     return {"status": "success"}
 
-@app.get("/process")
+@app.post("/process")
 def process_route(file_path: str):
     process_result = process_document(file_path)
     return JSONResponse(content=process_result, status_code=200)
