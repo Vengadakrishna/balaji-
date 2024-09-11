@@ -6,6 +6,8 @@ from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
 import requests
+from openai import AzureOpenAI
+
 
 # Load environment variables
 load_dotenv()
@@ -17,9 +19,11 @@ document_analysis_client = DocumentAnalysisClient(
     endpoint=form_recognizer_endpoint, credential=AzureKeyCredential(form_recognizer_key)
 )
 
-# OpenAI API details
-openai_api_key = os.getenv("OPENAI_API_KEY")
-openai_endpoint = os.getenv("OPENAI_ENDPOINT")
+client = AzureOpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            api_version="2024-02-15-preview",  
+            azure_endpoint=os.getenv("OPENAI_ENDPOINT")
+        )
 
 # Initialize FastAPI
 app = FastAPI()
@@ -56,36 +60,24 @@ def process_ocr_output(ocr_output):
         print(f"Error parsing corrected JSON: {e}") 
         raise
 
+
+
 def get_openai_response(messages):
     try:
-        url = f"{openai_endpoint}/v1/chat/completions"
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {openai_api_key}'
-        }
-        payload = {
-            "messages": [
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  
+            messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": messages}
             ],
-            "model": "gpt-3.5-turbo",
-            "max_tokens": 2000
-        }
+            max_tokens=2000
+        )
 
-        response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()  # Raise an exception for non-2xx status codes
-
-        result = response.json()
-
-        if 'choices' in result and result['choices']:
-            return result['choices'][0]['message']['content'].strip()
-        else:
-            print(f"Unexpected response format from OpenAI: {result}")
-            return None
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching response from OpenAI: {e}")
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error fetching response from Azure OpenAI: {e}")
         return None
+
     
 def get_metadata(content):
     prompt = f"""
@@ -269,7 +261,7 @@ def process_document(file_path):
 def read_root():
     return {"status": "success"}
 
-@app.post("/process")
+@app.get("/process")
 def process_route(file_path: str):
     process_result = process_document(file_path)
     return JSONResponse(content=process_result, status_code=200)
