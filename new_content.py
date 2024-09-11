@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
-import requests
 from openai import AzureOpenAI
 
 
