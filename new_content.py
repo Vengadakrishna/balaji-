@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
+import requests
 from openai import AzureOpenAI
 
 
@@ -18,11 +19,7 @@ document_analysis_client = DocumentAnalysisClient(
     endpoint=form_recognizer_endpoint, credential=AzureKeyCredential(form_recognizer_key)
 )
 
-client = AzureOpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            api_version="2024-02-15-preview",  
-            azure_endpoint=os.getenv("OPENAI_ENDPOINT")
-        )
+
 
 # Initialize FastAPI
 app = FastAPI()
@@ -63,13 +60,19 @@ def process_ocr_output(ocr_output):
 
 def get_openai_response(messages):
     try:
+        client = AzureOpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            api_version="2024-07-01-preview",  
+            azure_endpoint=os.getenv("OPENAI_ENDPOINT"),
+            azure_deployment="aipal",
+        )
         response = client.chat.completions.create(
-            model="gpt-35-turbo",  
+            model="gpt-4",  
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "You are a helpful assistant."},
                 {"role": "user", "content": messages}
             ],
-            max_tokens=2000
+            max_tokens=800
         )
 
         return response.choices[0].message.content.strip()
