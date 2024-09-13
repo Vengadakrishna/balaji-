@@ -1,5 +1,5 @@
 def get_metadata(content):
-   prompt = """
+   prompt = f"""
    You are an AI assistant tasked with extracting specific metadata fields from a document. Your goal is to accurately extract all required fields from the given document text. Follow these instructions carefully:
    1. Here is the full text of the document:
    <document_text>
