@@ -67,7 +67,7 @@ def get_openai_response(messages):
             azure_deployment="aipal",
         )
         response = client.chat.completions.create(
-            model="gpt-4",  
+            model="gpt-3.5-turbo",  
             messages=[
                 {"role": "user", "content": "You are a helpful assistant."},
                 {"role": "user", "content": messages}
