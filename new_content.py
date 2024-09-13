@@ -82,152 +82,91 @@ def get_openai_response(messages):
 
     
 def get_metadata(content):
-    prompt = f"""
-            You are tasked with extracting specific metadata fields from a document. Your goal is to accurately extract all required fields from the given document text.
+   prompt = """
+You are an AI assistant tasked with extracting specific metadata fields from a document. Your goal is to accurately extract all required fields from the given document text and provide confidence scores for each extraction. Follow these instructions carefully:
 
-            Now, here is the full text of the document:
-            
-            <document_text>
-            {content}
-            </document_text>
-            
-            You will need to extract information for the following fields:
-            
-            <fields_to_extract>
-            Buyer1 First Name
-            Buyer1 Middle Name
-            Buyer1 Last Name
-            Buyer2 First Name
-            Buyer2 Middle Name
-            Buyer2 Last Name
-            Buyer Organization
-            Seller1 First Name
-            Seller1 Middle Name
-            Seller1 Last Name
-            Seller2 First Name
-            Seller2 Middle Name
-            Seller2 Last Name
-            Seller Organization
-            Lender Name
-            Lender - Address
-            Lender - Phone Number
-            Lender Fax
-            Lender Email address
-            Lender Marketing Source
-            Lender Marketing Rep
-            Lender Reference
-            Lender Contact 1
-            Lender Contact 2
-            Listing Agent Name
-            Listing Agent Address
-            Listing Agent Phone Number
-            Listing Agent Fax
-            Listing Agent Email address
-            Listing Agent Marketing Source
-            Listing Agent Marketing Rep
-            Listing Agent Reference
-            Mortgage Broker Name
-            Mortgage Broker Address
-            Mortgage Broker Phone Number
-            Mortgage Broker Fax
-            Mortgage Broker Email address
-            Mortgage Broker Marketing Source
-            Marketing Rep
-            Reference
-            Mortgage Broker Contact 1
-            Mortgage Broker Contact 2
-            APN
-            Selling Agent
-            Escrow Company Name
-            Escrow Company Address
-            Escrow Company Phone Number
-            Escrow Company Fax
-            Escrow Company Email address
-            Escrow Company Marketing Source
-            Escrow Company Marketing Rep
-            Escrow Company Reference
-            Escrow Company Contact 1
-            Escrow Company Contact 2
-            Loan Amount
-            Sales Price
-            Policy Code
-            Transaction Type
-            Order Type
-            Policy Type
-            Product Type
-            Property Type
-            Rush Order
-            Title Officer
-            Related order(s):
-            Notes
-            Instructions
-            CPL
-            Other
-            Payoff Lender
-            Title Company Name
-            Title Company Lender - Address
-            Title Company Lender - Phone Number
-            Title Company Fax
-            Title Company Email address
-            Title Company Marketing Source
-            Title Company Marketing Rep
-            Title Company Reference
-            Settlement Agent Name
-            Settlement Agent Lender - Address
-            Settlement Agent Lender - Phone Number
-            Settlement Agent Fax
-            Settlement Agent Email address
-            Settlement Agent Marketing Source
-            Settlement Agent Marketing Rep
-            Settlement Agent Reference
-            Escrow Officer
-            Title Insurance Premium
-            Other (Title Searcher)
-            Project Name
-            360 Queue
-            Settlement Date
-            Abstractor
-            Underwriter
-            Attorney
-            Property Use
-            Endorsements
-            Tax/Map ID
-            Government
-            HOA
-            HOA Management Company
-            Qualified Intermediary
-            County Taxes
-            Lot Number(s)
-            Block
-            Subdivision/Tract
-            Pre-closer/ Escrow Assistant
-            Appraiser
-            Builder
-            General Contractor
-            Home Inspector
-            Loan Servicer
-            Pest Inspector
-            Sub Contractor
-            Guarantee
-            Hazard Insurance Agent
-            </fields_to_extract>
-            Please follow these instructions to extract the required information:
-            1. Carefully read through the entire document text.
-            2. For each field listed above, search for relevant information in the document.
-            3. Extract the exact text that corresponds to each field.
-            4. If a field's information is not found or is unclear, mark it as "Not found" or "Unclear" respectively.
-            Guidelines for handling missing or unclear information:
-            - If a date is not explicitly stated but can be inferred from context, extract it and note "Inferred" in parentheses after the date.
-            - For numeric fields (e.g., loan amounts), extract the full number including cents if available.
-            - For names, extract full names as they appear in the document.
-            - If a field has multiple relevant entries, include all of them separated by semicolons.
-            After extracting all fields, give the response in a field : value."""
-    try:
-        response = get_openai_response(prompt)
-        return response
-    except Exception as e:
-        print(f"Failed to parse OpenAI response for metadata: {e}")
-        return None
+1. Here is the full text of the document:
+<document_text>
+{content}
+</document_text>
+
+2. You need to extract information for the following fields:
+
+<fields_to_extract>
+Seller Name
+Seller Suffix
+Seller Relationship
+Seller Current Address
+Seller Same as Property address
+Seller City
+Seller State
+Seller Zip Code
+Seller Email address
+Seller WorkPhone /Ext:
+Seller Fax
+Seller Marketing Rep
+Seller Marketing Source
+Buyer Name
+Buyer Suffix
+Buyer Relationship
+Buyer Current Address
+Buyer Same as Property address
+Buyer City
+Buyer State
+Buyer Zip Code
+Buyer Email address
+Buyer WorkPhone /Ext:
+Buyer Fax
+Buyer Marketing Rep
+Buyer Marketing Source
+
+</fields_to_extract>
+
+3. To extract the information:
+a. Carefully read through the entire document text.
+b. For each field listed, search for relevant information within the document.
+c. Pay attention to headers, labels, or sections that might indicate where specific information is located.
+d. Be precise in your extraction, ensuring you capture the exact information as it appears in the document.
+
+4. Format your output as follows:
+a. Begin your response with <extracted_metadata> and end the response with </extracted_metadata>.
+b. For each extracted field, use the following format:
+[
+'Field'-the name of the feild : 'Extracted Value' - extracted value,
+'Confidence score': [0-100]
+]
+c. Provide a confidence score (0-100) for each extracted field, where 0 means no confidence and 100 means absolute certainty.
+d. If a field has multiple values (e.g., multiple buyer names), include all values separated by commas within the same field tag.
+
+5. If you cannot find information for a particular field:
+a. If the information is clearly not present in the document, use:
+[
+'Field': Not provided,
+'Confidence': 100
+]
+b. If the information is ambiguous or unclear, use:
+[
+'Field': Unclear - [brief explanation],
+'Confidence': [appropriate low score]
+]
+
+6. Before finalizing your response:
+a. Double-check each extracted field against the original document to ensure accuracy.
+b. Verify that you have addressed all fields listed in the <fields_to_extract> section.
+
+Remember, accuracy and completeness are crucial. Take your time to carefully extract all required information from the document and provide appropriate confidence scores for each extraction.
+   """
+   try:
+       response = get_openai_response(prompt.format(content=content))
+       return response
+       # Parse the XML-like response
+    #    import xml.etree.ElementTree as ET
+    #    root = ET.fromstring(response)
+    #    return {elem.tag: elem.text for elem in root}
+        
+   except Exception as e:
+       print(f"Failed to parse OpenAI response for metadata: {e}")
+       return None
 
 def process_document(file_path):
     try:
