@@ -1,0 +1,42 @@
+def get_metadata(content):
+    prompt = f"""
+    You are an AI assistant tasked with extracting specific metadata fields from a document. Your goal is to accurately extract all required fields from the given document text. Follow these instructions carefully:
+    1. Here is the full text of the document:
+    <document_text>
+    {content}
+</document_text>
+    2. You need to extract information for the following fields:
+    <fields_to_extract>
+    Seller Name, Seller Suffix, Seller Relationship, Seller Current Address, Seller Same as Property address, Seller City, Seller State, Seller Zip Code, Seller Email address, Seller WorkPhone /Ext:, Seller Fax, Seller Marketing Rep, Seller Marketing Source, Buyer Name, Buyer Suffix, Buyer Relationship, Buyer Current Address, Buyer Same as Property address, Buyer City, Buyer State, Buyer Zip Code, Buyer Email address, Buyer WorkPhone /Ext:, Buyer Fax, Buyer Marketing Rep, Buyer Marketing Source
+</fields_to_extract>
+    3. To extract the information:
+    a. Carefully read through the entire document text.
+    b. For each field listed, search for relevant information within the document.
+    c. Pay attention to headers, labels, or sections that might indicate where specific information is located.
+    d. Be precise in your extraction, ensuring you capture the exact information as it appears in the document.
+    e. Provide a confidence score (0-100) for each extracted field, where 0 means no confidence and 100 means absolute certainty.
+    4. Format your output as follows:
+    a. The first row should contain the field names separated by commas.
+    b. The second row should contain the extracted values or placeholders for each field, separated by commas and aligned with the corresponding field name from the first row.
+    c. If a field has multiple values (e.g., multiple buyer names), include all values separated by commas within the same cell.
+    5. If you cannot find information for a particular field:
+    a. If the information is clearly not present in the document, use Not provided
+    b. If the information is ambiguous or unclear, use Unclear - [brief explanation]
+    6. Before finalizing your response:
+    a. Double-check each extracted field against the original document to ensure accuracy.
+    b. Verify that you have addressed all fields listed in the <fields_to_extract> section.
+    7. Begin your response with <extracted_metadata> and end it with </extracted_metadata>.
+    Remember, accuracy and completeness are crucial. Take your time to carefully extract all required information from the document.
+    """
+    try:
+        response = get_openai_response(prompt.format(content=content))
+        lines = response.split('\n')
+        extracted_metadata = {}
+        field_names = lines[1].split('<extracted_metadata>')[1].split('</extracted_metadata>')[0].split(', ')
+        values = lines[2].split(', ')
+        for i, field_name in enumerate(field_names):
+            extracted_metadata[field_name] = values[i]
+        return extracted_metadata
+    except Exception as e:
+        print(f"Failed to parse OpenAI response for metadata: {e}")
+        return None
