@@ -4,7 +4,7 @@ import csv
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AzureOpenAI
 
 
 load_dotenv()
