@@ -4,7 +4,7 @@ import csv
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+from openai import OpenAI
 
 
 load_dotenv()
@@ -136,33 +136,49 @@ def ensure_directory_exists(directory_path):
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
 
-def update_csv(fields_and_answers, csv_file_path, office_name, document_type):
+def update_csv(fields_and_answers, csv_file_path, office_name, document_type, filename):
     try:
-        # ensure the directory exists
+        # Ensure the directory exists
         ensure_directory_exists(os.path.dirname(csv_file_path))
 
-        # ensure the file exists; create if not
-        if not os.path.exists(csv_file_path):
-            with open(csv_file_path, 'w', newline='') as f:
-                writer = csv.DictWriter(f, fieldnames=['office name', 'document type'] + list(fields_and_answers.keys()))
-                writer.writeheader()
+        # Define the new fields we want to add
+        new_fields = ['office name', 'document type', 'filename']
 
-        # to read existing data and update with new fields if necessary
-        with open(csv_file_path, 'r', newline='') as f:
-            reader = csv.DictReader(f)
-            existing_fieldnames = reader.fieldnames
+        # Combine all fields
+        all_fields = new_fields + [field for field in fields_and_answers.keys() if field not in new_fields]
 
-        new_fields = set(fields_and_answers.keys()) - set(existing_fieldnames)
-        if new_fields:
-            # Add new fields to the CSV
-            existing_fieldnames.extend(new_fields)
+        # Prepare the row data
+        row_data = {
+            'office name': office_name,
+            'document type': document_type,
+            'filename': filename
+        }
+        row_data.update(fields_and_answers)
 
-        # write updated data to CSV
-        with open(csv_file_path, 'a', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=existing_fieldnames)
-            row = {'office name': office_name, 'document type': document_type}
-            row.update(fields_and_answers)
-            writer.writerow(row)
+        # Check if the file exists and read its current content
+        file_exists = os.path.exists(csv_file_path)
+        existing_data = []
+        if file_exists:
+            with open(csv_file_path, 'r', newline='') as f:
+                reader = csv.DictReader(f)
+                existing_data = list(reader)
+                existing_fields = reader.fieldnames
+
+            # Update all_fields to include any missing existing fields
+            for field in existing_fields:
+                if field not in all_fields:
+                    all_fields.append(field)
+
+        # Write to CSV
+        with open(csv_file_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=all_fields)
+            writer.writeheader()
+            for row in existing_data:
+                writer.writerow(row)
+            writer.writerow(row_data)
+
+        print(f"Successfully updated CSV for file: {filename}")
+
     except Exception as e:
         print(f"Error while updating CSV: {e}")
 
@@ -181,7 +197,7 @@ def process_all_documents(directory_path):
                 
                 result = process_document(file_path)
                 if "error" not in result:
-                    update_csv(result, csv_file_path, office_name, document_type)
+                    update_csv(result, csv_file_path, office_name, document_type, file_name)
 
 
 def main():
