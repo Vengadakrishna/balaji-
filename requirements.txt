@@ -3,3 +3,7 @@ uvicorn
 azure-ai-formrecognizer
 python-dotenv
 openai
+azure-identity 
+azure-storage-blob 
+azure-cognitiveservices-vision-computervision 
+msrest 
