@@ -5,42 +5,42 @@ Set up Azure Form Recognizer, Azure Blob Storage, and Azure OpenAI services in y
 
 
 Install required Python packages:
-'''
+```
 pip install azure-identity azure-ai-formrecognizer azure-storage-blob azure-cognitiveservices-vision-computervision msrest openai python-dotenv
 
-'''
+```
 Set up environment variables:
 Create a .env file in the same directory as your script and add the following variables:
-'''
+```
 AZURE_OCR_ENDPOINT=<Your Form Recognizer endpoint>
 AZURE_STORAGE_ACCOUNT_URL=<Your Azure Blob Storage account URL>
 OPENAI_ENDPOINT=<Your Azure OpenAI endpoint>
 
-'''
+```
 Azure AD authentication:
 
 Ensure you're logged in to your Azure account using the Azure CLI:
-''' 
+``` 
 az login 
 
-'''
+```
 
 Set the subscription you want to use:
-''' 
+``` 
 az account set --subscription <your-subscription-id> 
 
-'''
+```
 
 
 
 Update local paths:
 Modify the document_directory and csv_file_path variables in the script to point to the correct locations on your local machine.
 Run the script:
-'''
+```
 
 python your_script_name.py 
 
-'''
+```
 
 
 Key changes in the updated code:
